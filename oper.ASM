@@ -3,15 +3,17 @@ include 'win32ax.inc'
 
 .data
  inputnumber DD 0
- outputstring DB "", 10,13,0
+ outputstring DB "123", 10,13,0
  inputstr DB "",10, 13, 0
+ num_char DD 5
 .code
 
 macro numtostr num, str
 {
-mov eax, [num]
+mov eax, num
 xor ecx, ecx
 mov ebx, 10
+
 numtostrloop1:
 xor edx, edx
 div ebx
@@ -20,7 +22,9 @@ push edx
 inc ecx
 test eax, eax
 jnz numtostrloop1
+
 mov edi, str
+
 numtostrloop2:
 pop edx
 mov byte[edi], dl
@@ -42,12 +46,12 @@ add eax, 11
 
 numtostr eax, outputstring
 
-  push STD_OUTPUT_HANDLE
-    call [GetStdHandle]
 
-    push 0
+push STD_OUTPUT_HANDLE
+call [GetStdHandle]
+
+push 0
     push inputnumber
-    push 20
     push outputstring
     push eax
     call [WriteConsole]
