@@ -3,7 +3,7 @@ include 'win32ax.inc'
 .data
 
 star DB '*',0
-text1str DB 'tre',0
+text1str DB 'tree',0
 number DD 0
 newline db 10, 13
 
@@ -36,6 +36,7 @@ drawTree:
     loop1:
         cmp ecx, 0                       ; Ïðîâåðÿåì çíà÷åíèå ecx
         je end_loop1                     ; Åñëè ecx = 0, âûõîäèì èç öèêëà
+
         push ecx                         ; Ñîõðàíÿåì òåêóùåå çíà÷åíèå ecx
         push STD_OUTPUT_HANDLE           ; Ïîäãîòàâëèâàåì ïàðàìåòðû äëÿ GetStdHandle
         call [GetStdHandle]
@@ -45,10 +46,13 @@ drawTree:
         push star                        ; Óêàçàòåëü íà ñòðîêó
         push eax                         ; Äåñêðèïòîð êîíñîëè
         call [WriteConsole]              ; Âûâîäèì ñòðîêó íà êîíñîëü
+
         pop ecx                          ; Âîññòàíàâëèâàåì ecx
         dec ecx                          ; Óìåíüøàåì çíà÷åíèå ecx
-        jmp loop1                        ; Âîçâðàùàåìñÿ ê íà÷àëó öèêëà loop1
+        jmp loop1                        ;
+
     end_loop1:
+
     push STD_OUTPUT_HANDLE
     call [GetStdHandle]
     push 0
@@ -64,7 +68,8 @@ drawTree:
     jmp mainLoop                     ; Âîçâðàùàåìñÿ â îñíîâíîé öèêë
 
 end_mainLoop:
-pop ecx                          ; Âîññòàíàâëèâàåì ðåãèñòðû
+
+pop ecx
 pop eax
 pop ebp
 ret 4
