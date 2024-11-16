@@ -1,12 +1,12 @@
 format PE Console
 include 'win32ax.inc'
+ include 'endprogram.asm'
 .data
 
 star DB '*',0
 text DB 'tree',0
 number DD 0
 newline db 10, 13
-inputnumber DD 0
 
 .code
 
@@ -30,6 +30,7 @@ pop ebp
 ret 4
 
 
+
 drawTree:
   push ebp
   mov ebp, esp
@@ -43,7 +44,7 @@ drawTree:
     cmp ecx, 0                       ; Проверяем, не равно ли ecx нулю
     je end_mainLoop                  ; Если ecx = 0, выходим из цикла
 
-    push ecx; Сохраняем значение ecx для внутреннего цикла
+    push ecx                         ; Сохраняем значение ecx для внутреннего цикла
     mov ebx, ecx                     ; Сохраняем в ebx, чтобы использовать в loop1
     sub ecx, 1
     loop1:
@@ -88,6 +89,7 @@ pop ebp
 ret 4
 
 
+
 start:
 
 mov ecx, text
@@ -102,14 +104,10 @@ notzero:
  push eax
  call color
 
+ push eax
+ call drawTree
 
+ push eax
 
-call [GetStdHandle]
-    push 0
-    push inputnumber
-    push 8
-    push inputnumber
-    push eax
-    call [ReadConsole]
-
+ ccall endprogram
 .end start

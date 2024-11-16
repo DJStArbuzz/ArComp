@@ -3,11 +3,31 @@ include 'win32ax.inc'
 .data
 
 star DB '*',0
-text1str DB 'tree',0
+text DB 'tree',0
 number DD 0
 newline db 10, 13
 
 .code
+
+color:
+  push ebp
+  mov ebp, esp
+
+  push eax
+  push ecx
+
+  ; Устанавливаем цвет консоли
+  push STD_OUTPUT_HANDLE
+  call [GetStdHandle]
+  mov ecx, [ebp + 8]               ; Цвет из аргументов
+  push ecx
+  push eax
+  call [SetConsoleTextAttribute]
+  pop ecx
+pop eax
+pop ebp
+ret 4
+
 
 drawTree:
   push ebp
@@ -16,39 +36,31 @@ drawTree:
   push eax
   push ecx
 
-  ; Г“Г±ГІГ Г­Г ГўГ«ГЁГўГ ГҐГ¬ Г¶ГўГҐГІ ГЄГ®Г­Г±Г®Г«ГЁ
-  push STD_OUTPUT_HANDLE
-  call [GetStdHandle]
-  mov ecx, [ebp + 8]               ; Г–ГўГҐГІ ГЁГ§ Г Г°ГЈГіГ¬ГҐГ­ГІГ®Гў
-  push ecx
-  push eax
-  call [SetConsoleTextAttribute]
-
   mov ecx, [ebp + 8]
 
   mainLoop:
-    cmp ecx, 0                       ; ГЏГ°Г®ГўГҐГ°ГїГҐГ¬, Г­ГҐ Г°Г ГўГ­Г® Г«ГЁ ecx Г­ГіГ«Гѕ
-    je end_mainLoop                  ; Г…Г±Г«ГЁ ecx = 0, ГўГ»ГµГ®Г¤ГЁГ¬ ГЁГ§ Г¶ГЁГЄГ«Г 
+    cmp ecx, 0                       ; Проверяем, не равно ли ecx нулю
+    je end_mainLoop                  ; Если ecx = 0, выходим из цикла
 
-    push ecx                         ; Г‘Г®ГµГ°Г Г­ГїГҐГ¬ Г§Г­Г Г·ГҐГ­ГЁГҐ ecx Г¤Г«Гї ГўГ­ГіГІГ°ГҐГ­Г­ГҐГЈГ® Г¶ГЁГЄГ«Г 
-    mov ebx, ecx                     ; Г‘Г®ГµГ°Г Г­ГїГҐГ¬ Гў ebx, Г·ГІГ®ГЎГ» ГЁГ±ГЇГ®Г«ГјГ§Г®ГўГ ГІГј Гў loop1
+    push ecx                         ; Сохраняем значение ecx для внутреннего цикла
+    mov ebx, ecx                     ; Сохраняем в ebx, чтобы использовать в loop1
     sub ecx, 1
     loop1:
-        cmp ecx, 0                       ; ГЏГ°Г®ГўГҐГ°ГїГҐГ¬ Г§Г­Г Г·ГҐГ­ГЁГҐ ecx
-        je end_loop1                     ; Г…Г±Г«ГЁ ecx = 0, ГўГ»ГµГ®Г¤ГЁГ¬ ГЁГ§ Г¶ГЁГЄГ«Г 
+        cmp ecx, 0                       ; Проверяем значение ecx
+        je end_loop1                     ; Если ecx = 0, выходим из цикла
 
-        push ecx                         ; Г‘Г®ГµГ°Г Г­ГїГҐГ¬ ГІГҐГЄГіГ№ГҐГҐ Г§Г­Г Г·ГҐГ­ГЁГҐ ecx
-        push STD_OUTPUT_HANDLE           ; ГЏГ®Г¤ГЈГ®ГІГ ГўГ«ГЁГўГ ГҐГ¬ ГЇГ Г°Г Г¬ГҐГІГ°Г» Г¤Г«Гї GetStdHandle
+        push ecx                         ; Сохраняем текущее значение ecx
+        push STD_OUTPUT_HANDLE           ; Подготавливаем параметры для GetStdHandle
         call [GetStdHandle]
-        push 0                           ; Г“ГЄГ Г§Г»ГўГ ГҐГ¬, Г·ГІГ® Г­ГҐ Г­ГіГ¦Г­Г® ГЁГ±ГЇГ®Г«ГјГ§Г®ГўГ ГІГј ГґГ«Г ГЈ
-        push number                 ; ГЉГ®Г«ГЁГ·ГҐГ±ГІГўГ® Г±ГЁГ¬ГўГ®Г«Г®Гў
-        push 1                           ; ГЉГ®Г«ГЁГ·ГҐГ±ГІГўГ® Г±ГЁГ¬ГўГ®Г«Г®Гў Г¤Г«Гї Г§Г ГЇГЁГ±ГЁ
-        push star                        ; Г“ГЄГ Г§Г ГІГҐГ«Гј Г­Г  Г±ГІГ°Г®ГЄГі
-        push eax                         ; Г„ГҐГ±ГЄГ°ГЁГЇГІГ®Г° ГЄГ®Г­Г±Г®Г«ГЁ
-        call [WriteConsole]              ; Г‚Г»ГўГ®Г¤ГЁГ¬ Г±ГІГ°Г®ГЄГі Г­Г  ГЄГ®Г­Г±Г®Г«Гј
+        push 0                           ; Указываем, что не нужно использовать флаг
+        push number                 ; Количество символов
+        push 1                           ; Количество символов для записи
+        push star                        ; Указатель на строку
+        push eax                         ; Дескриптор консоли
+        call [WriteConsole]              ; Выводим строку на консоль
 
-        pop ecx                          ; Г‚Г®Г±Г±ГІГ Г­Г ГўГ«ГЁГўГ ГҐГ¬ ecx
-        dec ecx                          ; Г“Г¬ГҐГ­ГјГёГ ГҐГ¬ Г§Г­Г Г·ГҐГ­ГЁГҐ ecx
+        pop ecx                          ; Восстанавливаем ecx
+        dec ecx                          ; Уменьшаем значение ecx
         jmp loop1                        ;
 
     end_loop1:
@@ -60,12 +72,12 @@ drawTree:
     push 2
     push newline
     push eax
-    call [WriteConsole]              ; Г‚Г»ГўГ®Г¤ГЁГ¬ ГЇГҐГ°ГҐГ­Г®Г± Г±ГІГ°Г®ГЄГЁ
+    call [WriteConsole]              ; Выводим перенос строки
 
-    pop ecx                          ; Г‚Г®Г±Г±ГІГ Г­Г ГўГ«ГЁГўГ ГҐГ¬ Г§Г­Г Г·ГҐГ­ГЁГҐ ecx ГЇГҐГ°ГҐГ¤ ГЇГ°Г®Г¤Г®Г«Г¦ГҐГ­ГЁГҐГ¬ mainLoop
-    dec ebx                          ; Г“Г¬ГҐГ­ГјГёГ ГҐГ¬ Г§Г­Г Г·ГҐГ­ГЁГҐ ГЁГ§ ebx
-    mov ecx, ebx                     ; ГЏГҐГ°ГҐГ¬ГҐГ№Г ГҐГ¬ Г°ГҐГ§ГіГ«ГјГІГ ГІ Г®ГЎГ°Г ГІГ­Г® Гў ecx
-    jmp mainLoop                     ; Г‚Г®Г§ГўГ°Г Г№Г ГҐГ¬Г±Гї Гў Г®Г±Г­Г®ГўГ­Г®Г© Г¶ГЁГЄГ«
+    pop ecx                          ; Восстанавливаем значение ecx перед продолжением mainLoop
+    dec ebx                          ; Уменьшаем значение из ebx
+    mov ecx, ebx                     ; Перемещаем результат обратно в ecx
+    jmp mainLoop                     ; Возвращаемся в основной цикл
 
 end_mainLoop:
 
@@ -77,7 +89,7 @@ ret 4
 
 start:
 
-mov ecx, text1str
+mov ecx, text
 xor eax, eax
 
 notzero:
@@ -87,9 +99,10 @@ notzero:
 
  add eax, 1
  push eax
- call drawTree
+ call color
 
  push eax
+ call drawTree
 
  push STD_INPUT_HANDLE
  call [GetStdHandle]

@@ -3,14 +3,13 @@ include 'win32ax.inc'
 .data
 
 star DB '*',0
-text DB 'tree',0
+text1str DB 'tree',0
 number DD 0
 newline db 10, 13
-inputnumber DD 0
 
 .code
 
-color:
+drawTree:
   push ebp
   mov ebp, esp
 
@@ -20,22 +19,10 @@ color:
   ; Устанавливаем цвет консоли
   push STD_OUTPUT_HANDLE
   call [GetStdHandle]
-  mov ecx, [ebp + 8]               ; Цвет из аргументов
+  mov ecx, [ebp + 2]               ; Цвет из аргументов
   push ecx
   push eax
   call [SetConsoleTextAttribute]
-  pop ecx
-pop eax
-pop ebp
-ret 4
-
-
-drawTree:
-  push ebp
-  mov ebp, esp
-
-  push eax
-  push ecx
 
   mov ecx, [ebp + 8]
 
@@ -43,7 +30,7 @@ drawTree:
     cmp ecx, 0                       ; Проверяем, не равно ли ecx нулю
     je end_mainLoop                  ; Если ecx = 0, выходим из цикла
 
-    push ecx; Сохраняем значение ecx для внутреннего цикла
+    push ecx                         ; Сохраняем значение ecx для внутреннего цикла
     mov ebx, ecx                     ; Сохраняем в ebx, чтобы использовать в loop1
     sub ecx, 1
     loop1:
@@ -90,7 +77,7 @@ ret 4
 
 start:
 
-mov ecx, text
+mov ecx, text1str
 xor eax, eax
 
 notzero:
@@ -100,16 +87,15 @@ notzero:
 
  add eax, 1
  push eax
- call color
+ call drawTree
 
+ push eax
 
-
-call [GetStdHandle]
-    push 0
-    push inputnumber
-    push 8
-    push inputnumber
-    push eax
-    call [ReadConsole]
+ push STD_INPUT_HANDLE
+ call [GetStdHandle]
+ push 8
+ push number
+ push eax
+ call [ReadConsole]
 
 .end start
