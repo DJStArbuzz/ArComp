@@ -1,14 +1,49 @@
 format PE Console
 include 'win32ax.inc'
+
 .data
+text1str DB 'My STRING 1',0
+ text2str DB 'My STRING 2',0
+ msg1str db 'Strings are equal.',10,13,0
+msg2str db 'Strings are not equal.',10,13,0
+ inputnum DD 0
+ stdoutputhandle dd 0
+ inputnumber DW 0
+ outputstr db '', 0
 
 star DB '*',0
 text DB 'tree',0
 number DD 0
 newline db 10, 13
-inputnumber DD 0
+
 
 .code
+
+macro numtostr num, str
+{
+mov eax, num
+xor ecx, ecx
+mov ebx, 10
+
+numtostrloop1:
+xor edx, edx
+div ebx
+add edx, '0'
+push edx
+inc ecx
+test eax, eax
+jnz numtostrloop1
+
+mov edi, str
+
+numtostrloop2:
+pop edx
+mov byte[edi], dl
+inc edi
+dec ecx
+test ecx, ecx
+jnz numtostrloop2
+}
 
 color:
   push ebp
@@ -29,7 +64,6 @@ pop eax
 pop ebp
 ret 4
 
-
 drawTree:
   push ebp
   mov ebp, esp
@@ -45,6 +79,7 @@ drawTree:
 
     push ecx; Сохраняем значение ecx для внутреннего цикла
     mov ebx, ecx                     ; Сохраняем в ebx, чтобы использовать в loop1
+
     sub ecx, 1
     loop1:
         cmp ecx, 0                       ; Проверяем значение ecx
@@ -88,7 +123,10 @@ pop ebp
 ret 4
 
 
+
 start:
+
+
 
 mov ecx, text
 xor eax, eax
@@ -102,7 +140,8 @@ notzero:
  push eax
  call color
 
-
+push eax
+ call drawTree
 
 call [GetStdHandle]
     push 0
@@ -111,5 +150,6 @@ call [GetStdHandle]
     push inputnumber
     push eax
     call [ReadConsole]
+
 
 .end start
