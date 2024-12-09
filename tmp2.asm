@@ -5,15 +5,15 @@ include 'win32ax.inc'
 section '.rdata' data readable writeable
   fmt  db   '%s', 13, 10, 0
   ext  db   'press key...%c',0
-  src  db   'first 1 20 3 45 67 90 1000 92 2974 4',0
+  src  db   'first st 1 20 3 45 67 90 1000 92 2974 4',0
   begin db  'Write sentence:', 13, 10, 0
-  error db  'Äîïóùåíà îøèáêà (÷èñëî áîëüøå 3999)', 13, 10, 0
+  error db  'Допущена ошибка (число больше 3999)', 13, 10, 0
   nums db '0123456789'
   index dd 0
 
   outputstr db  '', 13, 10, 0
-  res db "", 0
-  tmp db "", 0
+  res  db   256 dup(0)
+  tmp db "!", 0
   buff3 db 2 dup(0)
   dst  db   256 dup(0)
   dst3  db   256 dup(0)
@@ -72,19 +72,19 @@ numtostrloop1:
 }
 
 start:
-  ; âûâîä ñòðîêè
+  ; вывод строки
   invoke printf, fmt, src
-  ; ïåðâûé ðåâåðñ
+  ; первый реверс
   push   src
   push   dst
   call   str_reverse
 
 
-  invoke printf, fmt, dst
+ ; invoke printf, fmt, dst
   mov ecx, dst
   xor eax, eax
 
- ; ðàçìåð ñòðîêè
+ ; размер строки
 mov ecx, dst
  xor eax, eax
  dec eax
@@ -109,7 +109,7 @@ mov edi, dst
 dec edi
 
 mainLoop:
-  inc ebx  ; íà 1 èòåðàöèþ ìåíüøå ñòàë
+  inc ebx  ; на 1 итерацию меньше стал
   cmp ebx, [inputnumber]
   je endl
 
@@ -128,9 +128,18 @@ mainLoop:
      jnz  found
 
   notfound:
-       invoke  lstrcat, res, 'a'
-     mov [flag], 0
-    jmp endfind
+      mov [flag], 0
+      mov [char], al
+      cmp [char], ' '
+      je whitespace
+      jne notwh
+
+     whitespace:
+           invoke  lstrcat, res,  " "
+          jmp endfind
+     notwh:
+            invoke  lstrcat, res, "_"
+                      jmp endfind
   found:
          inc [flag]
          cmp al, "4"
@@ -152,7 +161,7 @@ mainLoop:
 
           zero:
             add [flag], 1
-             jmp endfind
+             jmp mainLoop
 
           foundLess4:
             cmp [flag], 1
@@ -168,14 +177,14 @@ mainLoop:
             je fourth
 
               first:
-              mov [char], al
-                  loopl4:
-                    cmp [char], '0'
-                    je fin
-               ;      invoke  lstrcat, res, 'I'
-                    ; invoke printf, fmt, "I"
-                     dec byte[char]
-                    jmp loopl4
+                   mov [char], al
+                   loop14:
+                   cmp [char], '0'
+                   je fin
+                  ; invoke printf, fmt, "X"
+                    invoke  lstrcat, res, 'I'
+                   dec byte[char]
+                   jmp loop14
              second:
                    mov [char], al
                    loop24:
@@ -186,7 +195,7 @@ mainLoop:
                      dec byte[char]
                      jmp loop24
            third:
-                   mov [char], al
+                  mov [char], al
                   loop34:
                      cmp [char], '0'
                      je fin
@@ -195,19 +204,18 @@ mainLoop:
                      dec byte[char]
                      jmp loop34
            fourth:
-                    mov [char], al
+                  mov [char], al
                   loop44:
-                    cmp [char], '0'
-                    je fin
-
-                       invoke  lstrcat, res, 'M'
-                     invoke printf, fmt, "M"
+                     cmp [char], '0'
+                     je fin
+                     invoke  lstrcat, res, 'M'
+                    ; invoke printf, fmt, "M"
                      dec byte[char]
                     jmp loop44
-          fin:
+           fin:
                 jmp mainLoop
 
-; ÷åòâåðêà
+; четверка
           foundEqual4:
             cmp [flag], 1
             je first2
@@ -219,23 +227,25 @@ mainLoop:
             je third2
 
             first2:
-              ; invoke  lstrcat, res, 'V'
-              ; invoke  lstrcat, res, 'I'
+               invoke  lstrcat, res, 'V'
+               invoke  lstrcat, res, 'I'
 
                ; invoke printf, fmt, "VI"
-               jmp mainLoop
+               jmp fin4
 
              second2:
                invoke  lstrcat, res, 'L'
                invoke  lstrcat, res, 'X'
                     ; invoke printf, fmt, "LX"
-               jmp mainLoop
+               jmp fin4
 
 
               third2:
                 invoke  lstrcat, res, 'D'
                 invoke  lstrcat, res, 'C'
                     ; invoke printf, fmt, "DC"
+                jmp fin4
+             fin4:
                 jmp mainLoop
 
 
@@ -264,31 +274,31 @@ mainLoop:
                   ;  invoke printf, fmt, "V"
                       jmp mainLoop
             second3:
-                mov [char], al
-                  loop243:
-                    cmp [char], '5'
-                    je fin2
-                    invoke  lstrcat, res, 'X'
+                   mov [char], al
+                   loop243:
+                     cmp [char], '5'
+                     je fin2
+                     invoke  lstrcat, res, 'X'
                     ; invoke printf, fmt, "I"
                      dec byte[char]
-                    jmp loop243
-                fin2:
-                invoke  lstrcat, res, 'L'
+                     jmp loop243
+                   fin2:
+                       invoke  lstrcat, res, 'L'
                   ;  invoke printf, fmt, "V"
-                jmp mainLoop
+                       jmp mainLoop
            third3:
-                      mov [char], al
+                  mov [char], al
                   loop343:
-                    cmp [char], '5'
-                    je fin3
-                    invoke  lstrcat, res, 'C'
+                     cmp [char], '5'
+                     je fin3
+                     invoke  lstrcat, res, 'C'
                     ; invoke printf, fmt, "C"
                      dec byte[char]
-                    jmp loop343
-                   fin3:
-                   invoke  lstrcat, res, 'D'
+                     jmp loop343
+                  fin3:
+                     invoke  lstrcat, res, 'D'
                   ; invoke printf, fmt, "D"
-                    jmp mainLoop
+                     jmp mainLoop
 
           foundEqual9:
              cmp [flag], 1
@@ -325,9 +335,9 @@ mainLoop:
 
 endl:
    push   res
-   push   dst
-     call   str_reverse
-  invoke printf, fmt, res
+   push   dst2
+   call   str_reverse
+  invoke printf, fmt,  dst2
 
   invoke scanf, ext, char
   invoke ExitProcess, 0
